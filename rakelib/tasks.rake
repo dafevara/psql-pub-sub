@@ -8,7 +8,6 @@ namespace 'tasks' do
         begin
           task.perform!
         rescue => e
-          p 'updating'
           task.update!(
             processing: false,
             next_try_at: 1.seconds.from_now,

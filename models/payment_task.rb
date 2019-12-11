@@ -50,7 +50,6 @@ class PaymentTask < ActiveRecord::Base
 
 
   def perform!
-    p 'performing'
     debit = payment.product.price
     balance = user.balance
     balance -= debit
