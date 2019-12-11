@@ -1,4 +1,7 @@
 require_relative '../models/payment_task'
+require 'logger'
+
+log = Logger.new('task.log')
 
 namespace 'tasks' do
   desc 'Listen events. Run delayed jobs/enqueued task. '
@@ -6,7 +9,8 @@ namespace 'tasks' do
     loop do
       if task = PaymentTask.next
         begin
-          task.perform!
+          log.debug '_'
+          task.perform!(log)
         rescue => e
           task.update!(
             processing: false,
@@ -19,6 +23,7 @@ namespace 'tasks' do
         end
 
         if task.error.blank?
+          log.debug 'completed!'
           task.destroy
         end
       else

@@ -1,10 +1,14 @@
 require_relative 'user'
 require_relative 'payment'
 require_relative 'product'
+require 'logger'
+
+
 
 class PaymentTask < ActiveRecord::Base
   belongs_to :user
   belongs_to :payment
+
 
   class << self
     def enqueue!(args)
@@ -49,7 +53,7 @@ class PaymentTask < ActiveRecord::Base
   end
 
 
-  def perform!
+  def perform!(log)
     debit = payment.product.price
     balance = user.balance
     balance -= debit
@@ -68,19 +72,12 @@ class PaymentTask < ActiveRecord::Base
           tries_left: tries_left - 1,
           next_try_at: Time.now + 10
         )
+        log.debug 'failed!'
+        return
       end
-    end
-
-    user.balance = balance
-
-    unless user.save
-      if tries_left > 0
-        update!(
-          error: "Unable to update user balance",
-          tries_left: tries_left - 1,
-          next_try_at: Time.now + 10
-        )
-      end
+    else
+      user.balance = balance
+      user.save
     end
   end
 end
