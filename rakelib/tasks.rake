@@ -4,12 +4,12 @@ require 'logger'
 log = Logger.new('task.log')
 
 namespace 'tasks' do
-  desc 'Listen events. Run delayed jobs/enqueued task. '
+  desc 'Listen events. Run delayed jobs/enqueued tasks. '
   task subscribe: :environment do
     loop do
       if task = PaymentTask.next
         begin
-          log.debug '_'
+          log.debug '-'
           task.perform!(log)
         rescue => e
           task.update!(
